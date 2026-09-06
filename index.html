@@ -12,7 +12,7 @@ body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:4;backg
 @keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
 header{min-height:100vh;position:relative;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;background:radial-gradient(circle at 50% 45%,#4b0a4e99 0,#170616aa 34%,#050205 78%)}
 header:before{content:"";position:absolute;width:75vw;height:75vw;border-radius:50%;background:radial-gradient(circle,#ff0a3f44,transparent 66%);animation:breathe 6s ease-in-out infinite}
-.hero-inner{position:relative;z-index:7;max-width:1100px;padding:55px 25px;will-change:transform,opacity;transition:opacity .1s linear}
+.hero-inner{position:relative;z-index:7;max-width:1100px;padding:55px 25px}
 .crown{font-size:68px;filter:drop-shadow(0 0 22px #c99a45);animation:breathe 4s infinite}
 .eyebrow,.chapter-no,.author,.navtitle{font-family:Cinzel,serif;letter-spacing:4px;text-transform:uppercase}
 .eyebrow{font-size:12px;color:var(--gold)}
@@ -122,29 +122,13 @@ header::after{
 @keyframes capIn{from{opacity:0;transform:translateY(16px) scale(.96)}to{opacity:1;transform:none}}
 
 /* Reaproveita animação de entrada dos capítulos com leve stagger e efeitos extras */
-.chapter{opacity:0;content-visibility:auto;contain-intrinsic-size:1px 900px;will-change:transform,opacity,filter}
-.chapter.revealed{animation:chapterRise .9s cubic-bezier(.2,.7,.2,1) both;will-change:auto}
+.chapter{opacity:0}
+.chapter.revealed{animation:chapterRise .9s cubic-bezier(.2,.7,.2,1) both}
 @keyframes chapterRise{
-  0%{opacity:0;transform:translateY(46px) scale(.985);filter:blur(7px)}
-  55%{filter:blur(1.5px)}
-  100%{opacity:1;transform:none;filter:blur(0)}
+  0%{opacity:0;transform:translateY(46px) scale(.985)}
+  60%{opacity:1}
+  100%{opacity:1;transform:none}
 }
-/* Revelação em camadas: cada elemento do capítulo "emerge" como uma pista sendo descoberta */
-@keyframes contentReveal{from{opacity:0;transform:translateY(16px);filter:blur(3px)}to{opacity:1;transform:none;filter:blur(0)}}
-.chapter.revealed article>*{animation:contentReveal .7s ease both}
-.chapter.revealed article>*:nth-child(1){animation-delay:.05s}
-.chapter.revealed article>*:nth-child(2){animation-delay:.16s}
-.chapter.revealed article>*:nth-child(3){animation-delay:.27s}
-.chapter.revealed article>*:nth-child(4){animation-delay:.38s}
-.chapter.revealed article>*:nth-child(5){animation-delay:.49s}
-.chapter.revealed article>*:nth-child(6){animation-delay:.6s}
-.chapter.revealed article>*:nth-child(7){animation-delay:.71s}
-.chapter.revealed article>*:nth-child(n+8){animation-delay:.8s}
-/* O traço vermelho "desenha" a linha do topo, como se estivesse sublinhando a pista revelada */
-.chapter:before{width:0!important;transition:none}
-.chapter.revealed:before{animation:lineDraw 1s cubic-bezier(.2,.7,.2,1) both .12s}
-@keyframes lineDraw{from{width:0}to{width:140px}}
-@media(prefers-reduced-motion:reduce){.chapter:before{width:140px!important}.chapter,.chapter.revealed article>*{opacity:1!important;filter:none!important;transform:none!important}}
 .chapter article{transition:box-shadow .4s ease,transform .4s ease}
 .chapter.revealed article{animation:articleGlow 1.4s ease both .15s}
 @keyframes articleGlow{
@@ -493,28 +477,14 @@ function updateActiveChapter() {
   }
 }
 
-// Paralaxe leve do herói: reaproveita o mesmo rAF já usado pelo progress bar/tracker,
-// então não adiciona nenhum listener extra (mantém o site leve).
-const heroInner = document.querySelector('.hero-inner');
-const heroCap = window.innerHeight || 800;
-function updateHeroParallax() {
-  if (!heroInner || reduced) return;
-  const y = window.scrollY;
-  if (y > heroCap) { heroInner.style.transform = ''; heroInner.style.opacity = ''; return; }
-  const p = y / heroCap;
-  heroInner.style.transform = 'translate3d(0,' + (p * 60) + 'px,0)';
-  heroInner.style.opacity = String(1 - p * 0.85);
-}
-
 let tickingTracker = false;
 window.addEventListener('scroll', () => {
   if (!tickingTracker) {
-    window.requestAnimationFrame(() => { updateActiveChapter(); updateProgress(); updateHeroParallax(); toTop.classList.toggle('show', window.scrollY > 600); tickingTracker = false; });
+    window.requestAnimationFrame(() => { updateActiveChapter(); updateProgress(); toTop.classList.toggle('show', window.scrollY > 600); tickingTracker = false; });
     tickingTracker = true;
   }
 }, { passive: true });
 updateActiveChapter();
-updateHeroParallax();
 
 // ===== Barra de progresso de leitura =====
 const progressBar = document.getElementById('progressBar');
